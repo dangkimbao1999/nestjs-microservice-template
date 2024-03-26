@@ -1,0 +1,24 @@
+{
+  "name": "social-fi-workspace",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/social-fi-workspace/src",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "social-fi-workspace:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "social-fi-workspace:build:development"
+        },
+        "production": {
+          "buildTarget": "social-fi-workspace:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}
