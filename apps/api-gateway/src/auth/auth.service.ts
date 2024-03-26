@@ -17,14 +17,18 @@ export class AuthService implements OnModuleInit {
     this.authClient.emit('create-user', JSON.stringify(CreateUserDto))
   }
 
-  async getUser(id: string) {
-    // return new Promise((resolve, reject) => {
-    //   this.authClient.send('get-user', { userId: parseInt(id) })
-    //     .subscribe({
-    //       next: (user) => resolve(user),
-    //       error: (err) => reject(err),
-    //     });
-    // });
-    return await this.authClient.send('get-user', {userId: parseInt(id)})
+  getUser(id: string) {
+    try {
+      this.authClient.subscribeToResponseOf('get-user')
+      return new Promise((resolve, reject) => {
+        this.authClient.send('get-user', JSON.stringify({ userId: parseInt(id) }))
+        .subscribe({
+          next: (user) => resolve(user),
+          error: (err) => reject(err),
+        });
+      });
+    } catch (err) {
+      console.error(err)
+    }
   }
 }
