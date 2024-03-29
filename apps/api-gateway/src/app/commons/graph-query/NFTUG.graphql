@@ -1,0 +1,10 @@
+query NFTUGs($skip: Int!, $first: Int!, $owner: String!) {
+  nftugs(
+    where: {owner: $owner}
+    first: $first
+    skip: $skip
+  ) {
+    id
+    uri
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "twitter-microservice",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/twitter-microservice/src",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "twitter-microservice:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "twitter-microservice:build:development"
+        },
+        "production": {
+          "buildTarget": "twitter-microservice:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}

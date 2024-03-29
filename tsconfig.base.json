@@ -17,6 +17,7 @@
     "paths": {
       "@social-fi-workspace/shared": ["shared/src/index.ts"],
       "@social-fi-workspace/shared/dto": ["shared/src/lib/dto/index.ts"],
+      "@social-fi-workspace/shared/services": ["shared/src/lib/services/index.ts"],
       "@social-fi-workspace/shared/entities": [
         "shared/src/lib/entities/index.ts"
       ]
