@@ -22,7 +22,7 @@ model User {
   coverImage    String?
   accountStatus Boolean            @default(false)
   point         Int                @default(0)
-  twitterId     String?
+  twitterId     String?             @unique
   teleId        String?
   referrer      User?              @relation("UserReferral", fields: [referrerId], references: [id])
   referrerId    String?
@@ -43,7 +43,6 @@ model Platform {
 model Criteria {
   id          Int                @id @default(autoincrement())
   description String?
-  query       String?
   point       Int                @default(0)
   platform    PlatformCriteria[]
 }
@@ -55,19 +54,18 @@ model PlatformCriteria {
   platformId   String
   logs         UserActivityLogs[]
   lastIdSynced String?
-
-  @@id([criteriaId, platformId])
+  query       Json?
+  id          String              @default(uuid()) @id
 }
 
 model UserActivityLogs {
   user       User             @relation(fields: [userId], references: [id])
   userId     String
-  task       PlatformCriteria @relation(fields: [criteriaId, platformId], references: [criteriaId, platformId])
-  criteriaId Int
-  platformId String
+  task       PlatformCriteria @relation(fields: [taskId], references: [id])
+  taskId      String
   time       DateTime         @default(now())
 
-  @@id([userId, criteriaId, platformId])
+  @@id([userId,taskId])
   @@index([time(sort: Desc)])
 }
 

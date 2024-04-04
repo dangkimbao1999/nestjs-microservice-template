@@ -1,10 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "composite": true,
-    "declaration": true,
+    // "composite": true,
+    // "declaration": true,
     "outDir": "../../dist/out-tsc",
-    "declarationDir": "../../dist/out-tsc/types",
+    // "declarationDir": "../../dist/out-tsc/types",
     "module": "commonjs",
     "types": ["node"],
     "emitDecoratorMetadata": true,
