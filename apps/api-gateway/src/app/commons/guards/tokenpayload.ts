@@ -1,6 +1,6 @@
 export interface TokenPayload {
-  signer: string
-  publicKey: string
-  userId: string
-  iat: string | number
+  signer: string;
+  publicKey: string;
+  userId: string;
+  iat: string | number;
 }

@@ -14,7 +14,7 @@ export class AuthenticatedGuard implements CanActivate {
       return true;
     } else {
       throw new UnauthorizedException(
-        'You must be logged in to access this resource.',
+        'You must be logged in to access this resource.'
       );
     }
   }

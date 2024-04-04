@@ -1,26 +1,26 @@
-import { TErrorMode } from '../definitions/IError.model'
-import { EErrorCode } from '../enums/Error.enum'
+import { TErrorMode } from '../definitions/IError.model';
+import { EErrorCode } from '../enums/Error.enum';
 
 interface Option {
-  errorInfo?: { code?: EErrorCode; message?: string }
+  errorInfo?: { code?: EErrorCode; message?: string };
 }
 
 export default class OtherError extends Error {
-  name = 'OtherError'
+  name = 'OtherError';
 
-  message: string
+  message: string;
 
-  code = EErrorCode.OTHER_ERROR
+  code = EErrorCode.OTHER_ERROR;
 
-  status = 500
+  status = 500;
 
-  info?: any
+  info?: any;
 
-  role: TErrorMode = 'CLIENT_RESPONSE'
+  role: TErrorMode = 'CLIENT_RESPONSE';
 
   constructor(option: Option) {
-    super()
-    if (option?.errorInfo?.code) this.code = option?.errorInfo?.code
-    if (option?.errorInfo?.message) this.message = option?.errorInfo.message
+    super();
+    if (option?.errorInfo?.code) this.code = option?.errorInfo?.code;
+    if (option?.errorInfo?.message) this.message = option?.errorInfo.message;
   }
 }

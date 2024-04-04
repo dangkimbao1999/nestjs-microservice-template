@@ -32,7 +32,7 @@ export class PrismaService
       const after = Date.now();
 
       this.logger.log(
-        `Query ${params.model}.${params.action} took ${after - before}ms`,
+        `Query ${params.model}.${params.action} took ${after - before}ms`
       );
       return result;
     });

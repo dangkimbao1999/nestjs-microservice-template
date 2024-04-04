@@ -1,18 +1,20 @@
 class RequestTimeError extends Error {
-  name = 'RequestTimeError'
+  name = 'RequestTimeError';
 
-  message: string
+  message: string;
 
-  code = 'REQUEST_TIMEOUT_ERROR'
+  code = 'REQUEST_TIMEOUT_ERROR';
 
-  status = 503
+  status = 503;
 
-  role = 1 // Return msg error to client
+  role = 1; // Return msg error to client
 
   constructor(message?: string) {
-    super()
-    this.message = message ? 'Request timeout! ' + message : 'Request timeout! '
+    super();
+    this.message = message
+      ? 'Request timeout! ' + message
+      : 'Request timeout! ';
   }
 }
 
-export { RequestTimeError }
+export { RequestTimeError };

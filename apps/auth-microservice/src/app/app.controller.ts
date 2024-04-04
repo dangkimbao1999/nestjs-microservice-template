@@ -8,15 +8,15 @@ import { CreateUserDto } from '@social-fi-workspace/shared/dto';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
- @EventPattern('create-user')
- handleUserCreate(@Payload(ValidationPipe) data: CreateUserDto) {
-  console.log('ủa alo')
-  this.appService.createUser(data)
- }
+  @EventPattern('create-user')
+  handleUserCreate(@Payload(ValidationPipe) data: CreateUserDto) {
+    console.log('ủa alo');
+    this.appService.createUser(data);
+  }
 
- @MessagePattern('get-user')
- getUser(@Payload('userId') userId: number) {
-  console.log('alo, here')
-  return this.appService.getUser(userId)
- }
+  @MessagePattern('get-user')
+  getUser(@Payload('userId') userId: number) {
+    console.log('alo, here');
+    return this.appService.getUser(userId);
+  }
 }

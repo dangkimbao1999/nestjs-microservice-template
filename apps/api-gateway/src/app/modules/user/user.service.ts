@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common'
-import { PrismaService } from '@social-fi-workspace/shared/services'
-import { User } from '@prisma/client'
-import { UpdateUserDto } from './dto/update-user.dto'
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@social-fi-workspace/shared/services';
+import { User } from '@prisma/client';
+import { UpdateUserDto } from './dto/update-user.dto';
+import OtherError from '../../commons/errors/OtherError.error';
+import { EErrorCode } from '../../commons/enums/Error.enum';
 
 @Injectable()
 export class UserService {
@@ -12,21 +14,21 @@ export class UserService {
     try {
       const user = await this.prisma.user.create({
         data: userData,
-      })
-      return user
+      });
+      return user;
     } catch (error) {
-      return null
+      return null;
     }
   }
 
   async findByPublicKey(publicKey: string): Promise<any> {
     const account = await this.prisma.user.findFirst({
       where: { publicKey },
-    })
+    });
     if (!account) {
-      return null
+      return null;
     }
-    return account
+    return account;
   }
 
   async findById(address: string): Promise<User | null> {
@@ -34,18 +36,51 @@ export class UserService {
       where: {
         id: address.toLocaleLowerCase(),
       },
-    })
+    });
   }
 
-  async updateUserById(id: string, bodyUpdate: UpdateUserDto): Promise<User> {
+  async updateUserById(user: User, bodyUpdate: UpdateUserDto): Promise<User> {
+    if (
+      (user.username && bodyUpdate.username) ||
+      (user.twitterId && bodyUpdate.twitterId)
+    ) {
+      throw new OtherError({
+        errorInfo: {
+          code: EErrorCode.PARAMETERS_ERROR,
+          message: 'Username is already available',
+        },
+      });
+    }
+    if (user.twitterId && bodyUpdate.twitterId) {
+      throw new OtherError({
+        errorInfo: {
+          code: EErrorCode.PARAMETERS_ERROR,
+          message: 'Twitter id is already available',
+        },
+      });
+    }
     const result = await this.prisma.user.update({
       where: {
-        id,
+        id: user.id,
       },
       data: {
-        ...bodyUpdate,
+        ...(bodyUpdate.avatar && { avatar: bodyUpdate.avatar }),
+        ...(bodyUpdate.username && { username: bodyUpdate.username }),
+        ...(bodyUpdate.coverImage && { avatar: bodyUpdate.coverImage }),
+        ...(bodyUpdate.twitterId && { twitterId: bodyUpdate.twitterId }),
       },
-    })
-    return result
+    });
+    return result;
+  }
+
+  async linkTwitterAccount(walletAddress: string, twitterId: string) {
+    await this.prisma.user.update({
+      where: {
+        id: walletAddress,
+      },
+      data: {
+        twitterId,
+      },
+    });
   }
 }

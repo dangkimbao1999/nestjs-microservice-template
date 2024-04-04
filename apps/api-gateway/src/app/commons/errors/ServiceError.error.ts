@@ -1,22 +1,22 @@
 export default class ServiceError extends Error {
-  name = 'ServiceError'
+  name = 'ServiceError';
 
-  message: string
+  message: string;
 
-  code = 'SERVICE_ERROR'
+  code = 'SERVICE_ERROR';
 
-  role = 1 // Return msg error to client
+  role = 1; // Return msg error to client
 
-  stack?: string = ''
+  stack?: string = '';
 
-  status = 500
+  status = 500;
 
   constructor(stack?: string) {
-    super()
-    this.message = 'Service not available! '
+    super();
+    this.message = 'Service not available! ';
     this.stack = stack
       ? `${this.code}
     ${stack}`
-      : this.message
+      : this.message;
   }
 }

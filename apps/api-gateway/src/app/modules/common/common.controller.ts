@@ -3,9 +3,9 @@ import {
   Post,
   UploadedFiles,
   UseInterceptors,
-} from '@nestjs/common'
-import { CommonService } from './common.service'
-import { FilesInterceptor } from '@nestjs/platform-express'
+} from '@nestjs/common';
+import { CommonService } from './common.service';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('common')
 export class CommonController {
@@ -14,6 +14,6 @@ export class CommonController {
   @Post('upload')
   @UseInterceptors(FilesInterceptor('files'))
   async uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[]) {
-    return this.commonService.uploadMultipleFiles(files)
+    return this.commonService.uploadMultipleFiles(files);
   }
 }

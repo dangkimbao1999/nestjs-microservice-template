@@ -58,18 +58,18 @@ class RedisDB {
         this.clientSync = new Redis.Cluster(this.listRedisNode);
         this.subscriberSync = new Redis.Cluster(this.listRedisNode);
         logger.info(
-          `${messageConstant.SERVER_MESSAGE.REDIS_CONNECTING}: ${process.env.REDIS_CLUSTER_NODE}`,
+          `${messageConstant.SERVER_MESSAGE.REDIS_CONNECTING}: ${process.env.REDIS_CLUSTER_NODE}`
         );
       } else {
         this.redisConfigSetter(
           process.env.REDISDB_HOST as string,
           process.env.REDISDB_PORT,
-          process.env.REDIS_PASSWORD,
+          process.env.REDIS_PASSWORD
         );
         this.clientSync = new Redis(this.redisConfig);
         this.subscriberSync = new Redis(this.redisConfig);
         logger.info(
-          `${messageConstant.SERVER_MESSAGE.REDIS_CONNECTING}: ${this.redisConfig.host}:${this.redisConfig.port}`,
+          `${messageConstant.SERVER_MESSAGE.REDIS_CONNECTING}: ${this.redisConfig.host}:${this.redisConfig.port}`
         );
       }
       let reconnect = 0;
@@ -93,7 +93,7 @@ class RedisDB {
       });
       this.subscriberSync.on('connect', async () => {
         this.subscriber = PromiseBluebird.promisifyAll(
-          this.subscriberSync as object,
+          this.subscriberSync as object
         );
         logger.info(messageConstant.SERVER_MESSAGE.REDIS_SUBSCRIBER_CONNECTED);
         resolve(null);
@@ -103,7 +103,7 @@ class RedisDB {
 
   public async subscribe(
     channel: string,
-    callback: (channel: string, message: any) => void,
+    callback: (channel: string, message: any) => void
   ): Promise<void> {
     if (!this.subscriber) {
       await this.connectSubscriber();
@@ -121,7 +121,7 @@ class RedisDB {
 
   public async publish<T>(
     channel: string,
-    message: RedisPubReq<T>,
+    message: RedisPubReq<T>
   ): Promise<number> {
     try {
       const client = await this.getClient();

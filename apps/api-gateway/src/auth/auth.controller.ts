@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Param, Post, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '@social-fi-workspace/shared/dto';
 

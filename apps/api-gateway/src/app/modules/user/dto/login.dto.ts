@@ -1,23 +1,23 @@
-import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator'
+import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class LoginDto {
   @IsString({ message: 'public key must be a string ' })
   @MinLength(5)
   @MaxLength(100)
-  publicKey: string
+  publicKey: string;
 
   @IsString({ message: 'signature must be a string ' })
   @MinLength(5)
   @MaxLength(500)
-  signature: string
+  signature: string;
 
   @IsString({ message: 'signer must be a string ' })
   @MinLength(5)
   @MaxLength(100)
-  signer: string
+  signer: string;
 
   @IsNotEmpty({ message: 'date is not empty' })
   @MinLength(5)
   @MaxLength(100)
-  date: string
+  date: string;
 }

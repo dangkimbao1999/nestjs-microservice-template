@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator'
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class LoginDto {
   @ApiProperty({
@@ -9,7 +9,7 @@ export class LoginDto {
   @IsString({ message: 'public key must be a string ' })
   @MinLength(5)
   @MaxLength(100)
-  publicKey: string
+  publicKey: string;
 
   @ApiProperty({
     example:
@@ -19,7 +19,7 @@ export class LoginDto {
   @IsString({ message: 'signature must be a string ' })
   @MinLength(5)
   @MaxLength(500)
-  signature: string
+  signature: string;
 
   @ApiProperty({
     example: '0x2743eec46576f76f47334569074242f3d9a90b44',
@@ -28,7 +28,7 @@ export class LoginDto {
   @IsString({ message: 'signer must be a string ' })
   @MinLength(5)
   @MaxLength(100)
-  signer: string
+  signer: string;
 
   @ApiProperty({
     example: '2024-03-06T18:48:41.610Z',
@@ -37,5 +37,5 @@ export class LoginDto {
   @IsNotEmpty({ message: 'date is not empty' })
   @MinLength(5)
   @MaxLength(100)
-  date: string
+  date: string;
 }

@@ -13,7 +13,7 @@ export class AppService {
 
   getUser(id: number): User {
     const result = this.usersRepository.findOne(id);
-    console.log(result)
-    return result
+    console.log(result);
+    return result;
   }
 }

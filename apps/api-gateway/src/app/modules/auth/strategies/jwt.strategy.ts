@@ -1,9 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
-import { PassportStrategy } from '@nestjs/passport'
-import { User } from '@prisma/client'
-import { ExtractJwt, Strategy } from 'passport-jwt'
-import { PrismaService } from '@social-fi-workspace/shared/services'
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { PassportStrategy } from '@nestjs/passport';
+import { User } from '@prisma/client';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { PrismaService } from '@social-fi-workspace/shared/services';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -15,16 +15,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET,
-    })
+    });
   }
 
   async validate(payload: any) {
     const user: User = await this.prisma.user.findUnique({
       where: { id: payload.sub },
-    })
+    });
     if (!user) {
-      throw new UnauthorizedException('alo')
+      throw new UnauthorizedException('alo');
     }
-    return user
+    return user;
   }
 }

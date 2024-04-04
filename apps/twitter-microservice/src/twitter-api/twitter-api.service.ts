@@ -1,48 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { TwitterApi, TwitterApiReadOnly } from 'twitter-api-v2';
+import { TwitterApi } from 'twitter-api-v2';
 import TwitterApiv2ReadOnly from 'twitter-api-v2/dist/esm/v2/client.v2.read';
-import needle from 'needle'
+import { Cron, CronExpression } from '@nestjs/schedule';
 @Injectable()
 export class TwitterAPIService {
   private twitterClient: TwitterApiv2ReadOnly;
 
   constructor() {
-    const apiKey = process.env.TWITTER_API_KEY
-    const apiSecret = process.env.TWITTER_API_SECRET
-    const accessToken = process.env.TWITTER_ACCESS_TOKEN
-    const accessSecret = process.env.TWITTER_ACCESS_SECRET
-    const bearer = process.env.TWITTER_BEARER_TOKEN
+    const bearer = process.env.TWITTER_BEARER_TOKEN;
 
-    console.log(bearer)
+    console.log(bearer);
 
     this.twitterClient = new TwitterApi(bearer).readOnly.v2;
   }
 
-  async postTweet(): Promise<any> {
-    // const tweets = await this.twitterClient.me();
-    // console.log(tweets)
-    const endpointURL = "https://api.twitter.com/2/users/by?usernames="
-    const params = {
-      usernames: "TwitterDev,TwitterAPI", // Edit usernames to look up
-      "user.fields": "created_at,description", // Edit optional query parameters here
-      "expansions": "pinned_tweet_id"
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async getTwitterLike() {
+    console.log('hello');
+    // await this.twitterClient.tweetLikedBy()
+    const usersPaginated = await this.twitterClient.tweetLikedBy(
+      '1774702734047883410',
+      { asPaginator: true },
+    );
+    for await (const user of usersPaginated) {
+      console.log(user.id);
     }
-    const res = await needle('get', endpointURL, params, {
-      headers: {
-          "User-Agent": "v2UserLookupJS",
-          "authorization": `Bearer ${process.env.TWITTER_BEARER_TOKEN}`
-      }
-  })
-
-  if (res.body) {
-      return res.body;
-  } else {
-      throw new Error('Unsuccessful request')
   }
-    // for await (const tweet of tweets) {
-    //     console.log(tweet)
-    // }
-  }
-
-  // Add more methods as needed
 }

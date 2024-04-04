@@ -14,13 +14,13 @@ import { GraphqlService } from './modules/graphql/graphql.service';
   imports: [AuthModule, UserModule],
   controllers: [AppController],
   providers: [
-    AppService, 
+    AppService,
     PrismaService,
     {
       provide: APP_INTERCEPTOR,
-      useClass: BigIntInterceptor
+      useClass: BigIntInterceptor,
     },
-    GraphqlService
+    GraphqlService,
   ],
 })
 export class AppModule {}

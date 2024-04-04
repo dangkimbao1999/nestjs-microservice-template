@@ -4,16 +4,16 @@ import {
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
-} from '@nestjs/common'
-import { UserService } from '../user/user.service'
-import { ethers } from 'ethers'
-import { LoginDto } from './dto/login.dto'
-import { LOGIN_MESSAGE } from '../../constants/Message.constant'
-import { JwtService } from '@nestjs/jwt'
-import { ConfigService } from '@nestjs/config'
-import SecureCommon from '../../commons/Secure.common'
-import { User } from '@prisma/client'
-import { PrismaService } from '@social-fi-workspace/shared/services'
+} from '@nestjs/common';
+import { UserService } from '../user/user.service';
+import { ethers } from 'ethers';
+import { LoginDto } from './dto/login.dto';
+import { LOGIN_MESSAGE } from '../../constants/Message.constant';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import SecureCommon from '../../commons/Secure.common';
+import { User } from '@prisma/client';
+import { PrismaService } from '@social-fi-workspace/shared/services';
 @Injectable()
 export class AuthService {
   constructor(
@@ -21,49 +21,49 @@ export class AuthService {
     private userService: UserService,
     private prismaService: PrismaService,
     private readonly prisma: PrismaService,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
   async refreshTokens(refreshToken: string) {
-    const userId = await SecureCommon.getSessionInfo(refreshToken)
+    const userId = await SecureCommon.getSessionInfo(refreshToken);
     if (!userId) {
-      throw new UnauthorizedException('Token not found')
+      throw new UnauthorizedException('Token not found');
     }
     const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
       },
-    })
+    });
     if (!user) {
-      throw new ForbiddenException('Access Denied')
+      throw new ForbiddenException('Access Denied');
     }
-    const tokens = await this.getTokens(user.id)
-    await this.updateRefreshTokenCaching(user, tokens.refreshToken)
-    await this.updateRefreshTokenCaching(user, refreshToken, true)
-    return tokens
+    const tokens = await this.getTokens(user.id);
+    await this.updateRefreshTokenCaching(user, tokens.refreshToken);
+    await this.updateRefreshTokenCaching(user, refreshToken, true);
+    return tokens;
   }
 
   async updateRefreshTokenCaching(user: User, token: string, isLogout = false) {
     if (!isLogout) {
-      SecureCommon.storeSession(user, token)
+      SecureCommon.storeSession(user, token);
     } else {
-      SecureCommon.deleteSessionInfo(token)
+      SecureCommon.deleteSessionInfo(token);
     }
   }
 
   async validateUser(loginDto: LoginDto) {
-    const loginMessage = LOGIN_MESSAGE(loginDto.date)
+    const loginMessage = LOGIN_MESSAGE(loginDto.date);
     const isSignatureValid = await this.isSignatureValid(
       loginMessage,
       loginDto.signature,
-      loginDto.publicKey,
-    )
+      loginDto.publicKey
+    );
 
     if (!isSignatureValid) {
-      throw new BadRequestException('Signature invalid')
+      throw new BadRequestException('Signature invalid');
     }
 
-    const user = await this.userService.findById(loginDto.signer)
+    const user = await this.userService.findById(loginDto.signer);
     if (user) {
       const updatedUser = await this.prisma.user.update({
         where: { id: loginDto.signer },
@@ -72,8 +72,8 @@ export class AuthService {
           signedMessage: loginMessage,
           signDate: new Date(loginDto.date),
         },
-      })
-      return updatedUser
+      });
+      return updatedUser;
     }
     //shield 2 minutes . when created user for test .can expand the shield time
     if (!user) {
@@ -92,12 +92,12 @@ export class AuthService {
             shortLink: loginDto.signer,
             accountStatus: false,
           },
-        })
+        });
         // create new node
-        return newUser
+        return newUser;
       } catch (err) {
-        console.log(err)
-        return null
+        console.log(err);
+        return null;
       }
     }
   }
@@ -110,7 +110,7 @@ export class AuthService {
         {
           secret: this.configService.get<string>('JWT_SECRET'),
           expiresIn: '1d',
-        },
+        }
       ),
       this.jwtService.signAsync(
         {
@@ -119,31 +119,31 @@ export class AuthService {
         {
           secret: this.configService.get<string>('JWT_SECRET'),
           expiresIn: '1d',
-        },
+        }
       ),
-    ])
-    const refreshTokenExpire = Date.now() + 1 * 24 * 3600 * 1000
-    const accessTokenExpire = Date.now() + 1 * 24 * 3600 * 1000
+    ]);
+    const refreshTokenExpire = Date.now() + 1 * 24 * 3600 * 1000;
+    const accessTokenExpire = Date.now() + 1 * 24 * 3600 * 1000;
     return {
       accessToken,
       refreshToken,
       refreshTokenExpire,
       accessTokenExpire,
       userId,
-    }
+    };
   }
 
   async isSignatureValid(message, signature, address) {
     try {
-      const signerAddr = await ethers.verifyMessage(message, signature)
+      const signerAddr = await ethers.verifyMessage(message, signature);
       if (signerAddr !== address) {
-        return false
+        return false;
       }
 
-      return true
+      return true;
     } catch (err) {
-      console.log(err)
-      return false
+      console.log(err);
+      return false;
     }
   }
 
@@ -155,15 +155,15 @@ export class AuthService {
       accessTokenExpire,
       refreshTokenExpire,
       userId,
-    } = await this.getTokens(user.id)
-    await this.updateRefreshTokenCaching(user, refreshToken, false)
-    if (!accessToken) throw new InternalServerErrorException()
+    } = await this.getTokens(user.id);
+    await this.updateRefreshTokenCaching(user, refreshToken, false);
+    if (!accessToken) throw new InternalServerErrorException();
     return {
       refreshToken,
       refreshTokenExpire,
       accessToken,
       accessTokenExpire,
       userId,
-    }
+    };
   }
 }

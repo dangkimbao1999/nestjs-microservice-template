@@ -18,4 +18,4 @@ enum EErrorCode {
   BAD_REQUEST_ERROR = 'BAD_REQUEST_ERROR',
 }
 
-export { EErrorCode }
+export { EErrorCode };

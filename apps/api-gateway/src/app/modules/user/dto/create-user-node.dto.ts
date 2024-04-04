@@ -1,11 +1,11 @@
-import { IsOptional, IsString } from 'class-validator'
+import { IsOptional, IsString } from 'class-validator';
 export class CreateUserNodeDto {
   @IsString()
-  address: string
+  address: string;
 
   @IsString()
-  base: number
+  base: number;
 
   @IsOptional()
-  loserAddress?: string[]
+  loserAddress?: string[];
 }

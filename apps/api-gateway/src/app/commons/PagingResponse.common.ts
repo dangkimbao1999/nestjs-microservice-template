@@ -1,8 +1,8 @@
 interface PagingResponse<T> {
-  data: T[]
+  data: T[];
   paging: {
-    total: number
-    limit: number
-    page: number
-  }
+    total: number;
+    limit: number;
+    page: number;
+  };
 }

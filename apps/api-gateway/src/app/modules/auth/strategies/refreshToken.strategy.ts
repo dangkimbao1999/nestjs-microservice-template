@@ -8,11 +8,11 @@ import { UserService } from '../../../modules/user/user.service';
 @Injectable()
 export class RefreshTokenStrategy extends PassportStrategy(
   Strategy,
-  'jwt-refresh',
+  'jwt-refresh'
 ) {
   constructor(
     @Inject(ConfigService) config: ConfigService,
-    private usersService: UserService,
+    private usersService: UserService
   ) {
     //     super({
     //   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

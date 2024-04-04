@@ -1,6 +1,6 @@
-import { IsString, MaxLength, MinLength } from 'class-validator'
-import { Exclude } from 'class-transformer'
-import { ApiProperty } from '@nestjs/swagger'
+import { IsString, MaxLength, MinLength } from 'class-validator';
+import { Exclude } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUserDto {
   @ApiProperty({
@@ -8,7 +8,7 @@ export class UpdateUserDto {
     description: 'The avartar url when uploaded',
   })
   @IsString({ message: 'avatar must be a string ' })
-  avatar: string
+  avatar: string;
 
   @ApiProperty({
     example: 'username_a',
@@ -17,24 +17,14 @@ export class UpdateUserDto {
   @IsString({ message: 'username must be a string ' })
   @MinLength(5)
   @MaxLength(255)
-  username: string
+  username: string;
 
   @ApiProperty({
     example: 'https://example.com/avatar/113456',
     description: 'The new cover image of user when update cover image',
   })
   @IsString({ message: 'cover image must be a string ' })
-  coverImage: string
+  coverImage: string;
 
-  @Exclude() signature: string
-  @Exclude() signedMessage: string
-  @Exclude() publicKey: string
-  @Exclude() signDate: any
-  @Exclude() shortLink: string
-  @Exclude() accountStatus: any
-  @Exclude() rank: any
-  @Exclude() exp: any
-  @Exclude() lastMatchTime: any
-  @Exclude() combatPower: any
-  @Exclude() shieldExpired: any
+  twitterId: string;
 }

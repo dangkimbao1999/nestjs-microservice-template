@@ -11,4 +11,4 @@ enum RoomMode {
   Revenge = 'revenge',
 }
 
-export { RoomMode, PlayMode }
+export { RoomMode, PlayMode };

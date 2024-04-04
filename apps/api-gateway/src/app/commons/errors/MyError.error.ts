@@ -1,13 +1,13 @@
-import { TErrorMode } from '../definitions/IError.model'
+import { TErrorMode } from '../definitions/IError.model';
 
 class MyError extends Error {
-  role: TErrorMode
+  role: TErrorMode;
 
-  info?: any
+  info?: any;
 
-  status: number
+  status: number;
 
-  code?: string
+  code?: string;
 }
 
-export { MyError }
+export { MyError };
