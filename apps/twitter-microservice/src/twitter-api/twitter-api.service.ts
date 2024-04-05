@@ -3,7 +3,7 @@ import { TwitterApi } from 'twitter-api-v2';
 import TwitterApiv2ReadOnly from 'twitter-api-v2/dist/esm/v2/client.v2.read';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '@social-fi-workspace/shared/services';
-import { LikeParam } from '../constants/Query.type';
+import { LikeParam, ReplyParam } from '../constants/Query.type';
 @Injectable()
 export class TwitterAPIService {
   private twitterClient: TwitterApiv2ReadOnly;
@@ -13,7 +13,7 @@ export class TwitterAPIService {
     this.twitterClient = new TwitterApi(bearer).readOnly.v2;
   }
 
-  async markCompleted(twitterId: string, taskId: string) {
+  async markCompleted(twitterId: string, taskId: string, tweetId?: string) {
     const user = await this.prisma.user.findUnique({
       where: {
         twitterId,
@@ -39,6 +39,7 @@ export class TwitterAPIService {
         data: {
           userId: user.id,
           taskId,
+          pointClaimed: task.criteria.point,
         },
       });
       await this.prisma.user.update({
@@ -57,7 +58,7 @@ export class TwitterAPIService {
         id: taskId,
       },
       data: {
-        lastIdSynced: twitterId,
+        lastIdSynced: tweetId ? tweetId : twitterId,
       },
     });
   }
@@ -101,7 +102,52 @@ export class TwitterAPIService {
         }
       }
     }
+  }
 
-    console.log(queries);
+  // @Cron(CronExpression.EVERY_10_SECONDS)
+  async getReply() {
+    const queries = await this.prisma.platformCriteria.findMany({
+      where: {
+        platformId: 'TW',
+        criteria: {
+          description: 'Reply',
+        },
+      },
+      include: {
+        criteria: true,
+      },
+    });
+    for (let i = 0; i < queries.length; i++) {
+      if (queries[i]?.query && typeof queries[i]?.query === 'object') {
+        const params = queries[i].query as unknown as ReplyParam;
+        console.log(queries[i].lastIdSynced);
+        const usersPaginated = await this.twitterClient.search(
+          `in_reply_to_tweet_id:${params.id}`,
+          {
+            expansions: 'author_id',
+            ...(queries[i].lastIdSynced && {
+              since_id: queries[i].lastIdSynced,
+            }),
+          },
+        );
+        let firstTweet = null;
+        for await (const tweet of usersPaginated) {
+          console.log('tweet: ', tweet);
+          if (tweet.id === queries[i].lastIdSynced) return;
+          if (!firstTweet) {
+            firstTweet = tweet;
+            await this.prisma.platformCriteria.update({
+              where: {
+                id: queries[i].id,
+              },
+              data: {
+                lastIdSynced: tweet.id,
+              },
+            });
+          }
+          await this.markCompleted(tweet.author_id, queries[i].id, tweet.id);
+        }
+      }
+    }
   }
 }

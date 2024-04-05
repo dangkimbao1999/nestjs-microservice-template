@@ -51,7 +51,10 @@ export class UserService {
         },
       });
     }
-    if (user.twitterId && bodyUpdate.twitterId) {
+    if (
+      (user.twitterId && bodyUpdate.twitterId) ||
+      (user.teleId && bodyUpdate.teleId)
+    ) {
       throw new OtherError({
         errorInfo: {
           code: EErrorCode.PARAMETERS_ERROR,
@@ -68,6 +71,7 @@ export class UserService {
         ...(bodyUpdate.username && { username: bodyUpdate.username }),
         ...(bodyUpdate.coverImage && { avatar: bodyUpdate.coverImage }),
         ...(bodyUpdate.twitterId && { twitterId: bodyUpdate.twitterId }),
+        ...(bodyUpdate.teleId && { twitterId: bodyUpdate.teleId }),
       },
     });
     return result;

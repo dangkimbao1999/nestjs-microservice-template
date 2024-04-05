@@ -64,6 +64,7 @@ model UserActivityLogs {
   task       PlatformCriteria @relation(fields: [taskId], references: [id])
   taskId      String
   time       DateTime         @default(now())
+  pointClaimed  Int           
 
   @@id([userId,taskId])
   @@index([time(sort: Desc)])

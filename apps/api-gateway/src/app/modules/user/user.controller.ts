@@ -36,7 +36,7 @@ export class UserController {
   @UseGuards(AuthenticationGuard)
   async updateMe(
     @CurrentUser() userRequest,
-    @Body() bodyUpdate: UpdateUserDto
+    @Body() bodyUpdate: UpdateUserDto,
   ) {
     return this.userService.updateUserById(userRequest.id, bodyUpdate);
   }

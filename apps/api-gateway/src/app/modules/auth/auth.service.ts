@@ -21,7 +21,7 @@ export class AuthService {
     private userService: UserService,
     private prismaService: PrismaService,
     private readonly prisma: PrismaService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
   async refreshTokens(refreshToken: string) {
@@ -46,6 +46,11 @@ export class AuthService {
   async updateRefreshTokenCaching(user: User, token: string, isLogout = false) {
     if (!isLogout) {
       SecureCommon.storeSession(user, token);
+      await this.prisma.loginHistory.create({
+        data: {
+          userId: user.id,
+        },
+      });
     } else {
       SecureCommon.deleteSessionInfo(token);
     }
@@ -56,7 +61,7 @@ export class AuthService {
     const isSignatureValid = await this.isSignatureValid(
       loginMessage,
       loginDto.signature,
-      loginDto.publicKey
+      loginDto.publicKey,
     );
 
     if (!isSignatureValid) {
@@ -110,7 +115,7 @@ export class AuthService {
         {
           secret: this.configService.get<string>('JWT_SECRET'),
           expiresIn: '1d',
-        }
+        },
       ),
       this.jwtService.signAsync(
         {
@@ -119,7 +124,7 @@ export class AuthService {
         {
           secret: this.configService.get<string>('JWT_SECRET'),
           expiresIn: '1d',
-        }
+        },
       ),
     ]);
     const refreshTokenExpire = Date.now() + 1 * 24 * 3600 * 1000;

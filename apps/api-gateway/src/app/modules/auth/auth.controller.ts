@@ -17,7 +17,7 @@ export class AuthController {
     description: 'The user has been successfully login.',
   })
   async login(
-    @Body() body: LoginDto
+    @Body() body: LoginDto,
   ): Promise<LoginResponse | { message: string }> {
     const user = await this.authService.validateUser(body);
     if (user) {

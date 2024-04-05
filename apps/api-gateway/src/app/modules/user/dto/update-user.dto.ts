@@ -1,5 +1,4 @@
 import { IsString, MaxLength, MinLength } from 'class-validator';
-import { Exclude } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUserDto {
@@ -26,5 +25,15 @@ export class UpdateUserDto {
   @IsString({ message: 'cover image must be a string ' })
   coverImage: string;
 
+  @ApiProperty({
+    example: '1602874272627949568',
+    description: 'The TWITTER ID',
+  })
   twitterId: string;
+
+  @ApiProperty({
+    example: '1602874272627949568',
+    description: 'The TWITTER ID',
+  })
+  teleId: string;
 }
