@@ -1,7 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '@social-fi-workspace/shared/services';
-import { addDays, endOfWeek, isSameDay, startOfWeek, subDays } from 'date-fns';
+import {
+  addDays,
+  differenceInCalendarDays,
+  endOfWeek,
+  isSameDay,
+  parseISO,
+  startOfWeek,
+  subDays,
+} from 'date-fns';
 
 @Injectable()
 export class CheckinService {
@@ -20,51 +28,74 @@ export class CheckinService {
       where: { userId },
       orderBy: { loginAt: 'desc' },
     });
+    if (checkIns.length === 0) return 0;
 
-    let streak = 0;
-    let checkDate = new Date();
-    for (const checkIn of checkIns) {
-      if (this.isSameDay(checkIn.loginAt, checkDate)) {
+    let streak = 1; // Start count with the most recent login
+    for (let i = 0; i < checkIns.length - 1; i++) {
+      const currentLogin = parseISO(checkIns[i].loginAt.toISOString());
+      const nextLogin = parseISO(checkIns[i + 1].loginAt.toISOString());
+
+      // Calculate the difference in days between consecutive logins
+      const dayDiff = differenceInCalendarDays(currentLogin, nextLogin);
+
+      if (dayDiff === 1) {
         streak++;
-        checkDate = subDays(checkDate, 1); // Move back one day for the next iteration
       } else {
-        break; // Streak is broken
+        // If the difference is more than 1, streak is broken
+        break;
       }
     }
+
     return streak;
   }
 
   // Calculate the weekly streak
   async calculateWeeklyStreak(userId: string): Promise<number> {
     const now = new Date();
-    const startOfWeekDate = startOfWeek(now, { weekStartsOn: 1 }); // Configure start of week based on your locale
-    const endOfWeekDate = endOfWeek(now, { weekStartsOn: 1 });
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 }); // Configures week to start on Monday
+    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
 
-    const weeklyCheckIns = await this.prisma.checkinHistory.findMany({
+    const checkInsThisWeek = await this.prisma.checkinHistory.findMany({
       where: {
         userId,
         loginAt: {
-          gte: startOfWeekDate,
-          lte: endOfWeekDate,
+          gte: weekStart,
+          lte: weekEnd,
         },
       },
-      orderBy: { loginAt: 'asc' },
+      orderBy: {
+        loginAt: 'asc',
+      },
     });
 
-    if (!weeklyCheckIns.length) return 0;
+    if (checkInsThisWeek.length === 0) return 0;
 
-    let streak = 1; // At least one check-in exists in the current week
-    let lastCheckInDate = weeklyCheckIns[0].loginAt;
+    let streak = 1; // Assumes at least one check-in counts as the start of a streak
+    let lastCheckInDate = parseISO(checkInsThisWeek[0].loginAt.toISOString());
 
-    for (let i = 1; i < weeklyCheckIns.length; i++) {
-      const currentDate = weeklyCheckIns[i].loginAt;
-      if (isSameDay(addDays(lastCheckInDate, 1), currentDate)) {
-        streak++;
-        lastCheckInDate = currentDate;
-      } else if (!isSameDay(lastCheckInDate, currentDate)) {
-        // If it's not a consecutive day and not the same day (multiple check-ins), reset the streak
-        streak = 1;
-        lastCheckInDate = currentDate;
+    // Track unique days to handle multiple check-ins per day
+    const uniqueDays = [lastCheckInDate];
+
+    for (let i = 1; i < checkInsThisWeek.length; i++) {
+      const currentCheckInDate = parseISO(
+        checkInsThisWeek[i].loginAt.toISOString(),
+      );
+
+      // Check if the current check-in is on a new day
+      if (!uniqueDays.some((ud) => isSameDay(ud, currentCheckInDate))) {
+        uniqueDays.push(currentCheckInDate);
+
+        // Calculate the difference in calendar days to the last unique day
+        const dayDiff = differenceInCalendarDays(
+          currentCheckInDate,
+          lastCheckInDate,
+        );
+        if (dayDiff === 1) {
+          streak++; // Increment streak if days are consecutive
+        } else if (dayDiff > 1) {
+          streak = 1; // Reset streak if there's a gap of more than one day
+        }
+        lastCheckInDate = currentCheckInDate; // Update the last check-in date
       }
     }
 
@@ -100,11 +131,11 @@ export class CheckinService {
   }
 
   // Determine if two dates are the same day
-  private isSameDay(date1: Date, date2: Date): boolean {
-    return (
-      date1.getDate() === date2.getDate() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getFullYear() === date2.getFullYear()
-    );
-  }
+  // private isSameDay(date1: Date, date2: Date): boolean {
+  //   return (
+  //     date1.getDate() === date2.getDate() &&
+  //     date1.getMonth() === date2.getMonth() &&
+  //     date1.getFullYear() === date2.getFullYear()
+  //   );
+  // }
 }
