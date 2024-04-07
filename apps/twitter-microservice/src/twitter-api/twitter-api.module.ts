@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TwitterAPIService } from './twitter-api.service';
 import { TwitterApiController } from './twitter-api.controller';
-import { PrismaService } from '@social-fi-workspace/shared/services';
+import { PrismaService, ReferralService } from '@social-fi-workspace/shared/services';
 
 @Module({
   controllers: [TwitterApiController],
-  providers: [TwitterAPIService, PrismaService],
+  providers: [TwitterAPIService, PrismaService, ReferralService],
 })
 export class TwitterApiModule {}

@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "UserActivityLogs" ALTER COLUMN "pointClaimed" SET DATA TYPE DECIMAL(65,30);
+
+-- AlterTable
+ALTER TABLE "users" ALTER COLUMN "point" SET DEFAULT 0,
+ALTER COLUMN "point" SET DATA TYPE DECIMAL(65,30);

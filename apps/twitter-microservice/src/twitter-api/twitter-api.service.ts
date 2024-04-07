@@ -2,13 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { TwitterApi } from 'twitter-api-v2';
 import TwitterApiv2ReadOnly from 'twitter-api-v2/dist/esm/v2/client.v2.read';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { PrismaService } from '@social-fi-workspace/shared/services';
+import {
+  PrismaService,
+  ReferralService,
+} from '@social-fi-workspace/shared/services';
 import { LikeParam, ReplyParam } from '../constants/Query.type';
 @Injectable()
 export class TwitterAPIService {
   private twitterClient: TwitterApiv2ReadOnly;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    readonly referrerService: ReferralService,
+  ) {
     const bearer = process.env.TWITTER_BEARER_TOKEN;
     this.twitterClient = new TwitterApi(bearer).readOnly.v2;
   }
@@ -35,12 +41,13 @@ export class TwitterAPIService {
       },
     });
     if (!activityLog && user) {
+      const calculatedPoint =
+        (process.env.BASE_POINT as unknown as number) * task.criteria.rate;
       await this.prisma.userActivityLogs.create({
         data: {
           userId: user.id,
           taskId,
-          pointClaimed:
-            (process.env.BASE_POINT as unknown as number) * task.criteria.rate,
+          pointClaimed: calculatedPoint,
         },
       });
       await this.prisma.user.update({
@@ -49,12 +56,12 @@ export class TwitterAPIService {
         },
         data: {
           point: {
-            increment:
-              (process.env.BASE_POINT as unknown as number) *
-              task.criteria.rate,
+            increment: calculatedPoint,
           },
         },
       });
+      console.log(user, calculatedPoint)
+      await this.referrerService.create(user.id, calculatedPoint);
     }
     await this.prisma.platformCriteria.update({
       where: {
@@ -79,7 +86,6 @@ export class TwitterAPIService {
         criteria: true,
       },
     });
-
     for (let i = 0; i < queries.length; i++) {
       if (queries[i]?.query && typeof queries[i]?.query === 'object') {
         const params = queries[i].query as unknown as LikeParam;
@@ -107,7 +113,7 @@ export class TwitterAPIService {
     }
   }
 
-  // @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async getReply() {
     const queries = await this.prisma.platformCriteria.findMany({
       where: {

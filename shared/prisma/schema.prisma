@@ -21,7 +21,7 @@ model User {
   shortLink     String?            @unique
   coverImage    String?
   accountStatus Boolean            @default(false)
-  point         Int                @default(0)
+  point         Decimal              @default(0)
   twitterId     String?             @unique
   teleId        String?
   referrer      User?              @relation("UserReferral", fields: [referrerId], references: [id])
@@ -65,7 +65,7 @@ model UserActivityLogs {
   task       PlatformCriteria @relation(fields: [taskId], references: [id])
   taskId      String
   time       DateTime         @default(now())
-  pointClaimed  Int           
+  pointClaimed  Decimal           
 
   @@id([userId,taskId])
   @@index([time(sort: Desc)])
