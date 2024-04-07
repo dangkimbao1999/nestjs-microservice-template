@@ -23,7 +23,7 @@ CREATE TABLE "users" (
 
 -- CreateTable
 CREATE TABLE "Platform" (
-    "id" TEXT NOT NULL DEFAULT 'uu',
+    "id" TEXT NOT NULL DEFAULT 'base',
     "name" TEXT NOT NULL,
 
     CONSTRAINT "Platform_pkey" PRIMARY KEY ("id")
@@ -33,8 +33,7 @@ CREATE TABLE "Platform" (
 CREATE TABLE "Criteria" (
     "id" SERIAL NOT NULL,
     "description" TEXT,
-    "query" TEXT,
-    "point" INTEGER NOT NULL DEFAULT 0,
+    "rate" DOUBLE PRECISION NOT NULL DEFAULT 0,
 
     CONSTRAINT "Criteria_pkey" PRIMARY KEY ("id")
 );
@@ -43,18 +42,22 @@ CREATE TABLE "Criteria" (
 CREATE TABLE "PlatformCriteria" (
     "criteriaId" INTEGER NOT NULL,
     "platformId" TEXT NOT NULL,
+    "lastIdSynced" TEXT,
+    "query" JSONB,
+    "isDaily" BOOLEAN NOT NULL DEFAULT false,
+    "id" TEXT NOT NULL,
 
-    CONSTRAINT "PlatformCriteria_pkey" PRIMARY KEY ("criteriaId","platformId")
+    CONSTRAINT "PlatformCriteria_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "UserActivityLogs" (
     "userId" TEXT NOT NULL,
-    "criteriaId" INTEGER NOT NULL,
-    "platformId" TEXT NOT NULL,
+    "taskId" TEXT NOT NULL,
     "time" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "pointClaimed" INTEGER NOT NULL,
 
-    CONSTRAINT "UserActivityLogs_pkey" PRIMARY KEY ("userId","criteriaId","platformId")
+    CONSTRAINT "UserActivityLogs_pkey" PRIMARY KEY ("userId","taskId")
 );
 
 -- CreateTable
@@ -76,7 +79,13 @@ CREATE UNIQUE INDEX "users_signature_key" ON "users"("signature");
 CREATE UNIQUE INDEX "users_shortLink_key" ON "users"("shortLink");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "users_twitterId_key" ON "users"("twitterId");
+
+-- CreateIndex
 CREATE INDEX "UserActivityLogs_time_idx" ON "UserActivityLogs"("time" DESC);
+
+-- CreateIndex
+CREATE INDEX "login_histories_userId_idx" ON "login_histories"("userId");
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_referrerId_fkey" FOREIGN KEY ("referrerId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -91,7 +100,7 @@ ALTER TABLE "PlatformCriteria" ADD CONSTRAINT "PlatformCriteria_platformId_fkey"
 ALTER TABLE "UserActivityLogs" ADD CONSTRAINT "UserActivityLogs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserActivityLogs" ADD CONSTRAINT "UserActivityLogs_criteriaId_platformId_fkey" FOREIGN KEY ("criteriaId", "platformId") REFERENCES "PlatformCriteria"("criteriaId", "platformId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserActivityLogs" ADD CONSTRAINT "UserActivityLogs_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "PlatformCriteria"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "login_histories" ADD CONSTRAINT "login_histories_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

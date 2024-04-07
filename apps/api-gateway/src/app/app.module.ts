@@ -9,9 +9,10 @@ import { PrismaService } from '@social-fi-workspace/shared/services';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { BigIntInterceptor } from './commons/interceptors/bigint.interceptor';
 import { GraphqlService } from './modules/graphql/graphql.service';
+import { CheckinModule } from './modules/checkin/checkin.module';
 
 @Module({
-  imports: [AuthModule, UserModule],
+  imports: [AuthModule, UserModule, CheckinModule],
   controllers: [AppController],
   providers: [
     AppService,

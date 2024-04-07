@@ -28,14 +28,14 @@ model User {
   referrerId    String?
   referees      User[]             @relation("UserReferral")
   logs          UserActivityLogs[]
-  loginHistory  LoginHistory[]
+  loginHistory  CheckinHistory[]
 
   @@id([id])
   @@map("users")
 }
 
 model Platform {
-  id        String             @id @default("uu")
+  id        String             @id @default("base")
   name      String
   criterias PlatformCriteria[]
 }
@@ -43,7 +43,7 @@ model Platform {
 model Criteria {
   id          Int                @id @default(autoincrement())
   description String?
-  point       Int                @default(0)
+  rate       Float                @default(0)
   platform    PlatformCriteria[]
 }
 
@@ -55,6 +55,7 @@ model PlatformCriteria {
   logs         UserActivityLogs[]
   lastIdSynced String?
   query       Json?
+  isDaily     Boolean             @default(false)
   id          String              @default(uuid()) @id
 }
 
@@ -70,11 +71,12 @@ model UserActivityLogs {
   @@index([time(sort: Desc)])
 }
 
-model LoginHistory {
+model CheckinHistory {
   id      Int      @id @default(autoincrement())
   userId  String
   loginAt DateTime @default(now())
   user    User     @relation(fields: [userId], references: [id])
 
   @@map("login_histories")
+  @@index([userId, loginAt(sort: Desc)])
 }

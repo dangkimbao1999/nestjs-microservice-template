@@ -39,7 +39,8 @@ export class TwitterAPIService {
         data: {
           userId: user.id,
           taskId,
-          pointClaimed: task.criteria.point,
+          pointClaimed:
+            (process.env.BASE_POINT as unknown as number) * task.criteria.rate,
         },
       });
       await this.prisma.user.update({
@@ -48,7 +49,9 @@ export class TwitterAPIService {
         },
         data: {
           point: {
-            increment: task.criteria.point,
+            increment:
+              (process.env.BASE_POINT as unknown as number) *
+              task.criteria.rate,
           },
         },
       });

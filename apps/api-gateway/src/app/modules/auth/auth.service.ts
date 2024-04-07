@@ -46,11 +46,6 @@ export class AuthService {
   async updateRefreshTokenCaching(user: User, token: string, isLogout = false) {
     if (!isLogout) {
       SecureCommon.storeSession(user, token);
-      await this.prisma.loginHistory.create({
-        data: {
-          userId: user.id,
-        },
-      });
     } else {
       SecureCommon.deleteSessionInfo(token);
     }
