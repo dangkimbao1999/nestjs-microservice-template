@@ -4,7 +4,6 @@ import { User } from '@prisma/client';
 import { UpdateUserDto } from './dto/update-user.dto';
 import OtherError from '../../commons/errors/OtherError.error';
 import { EErrorCode } from '../../commons/enums/Error.enum';
-
 @Injectable()
 export class UserService {
   //   private readonly logger = new Logger( UserService.name);
@@ -75,16 +74,5 @@ export class UserService {
       },
     });
     return result;
-  }
-
-  async linkTwitterAccount(walletAddress: string, twitterId: string) {
-    await this.prisma.user.update({
-      where: {
-        id: walletAddress,
-      },
-      data: {
-        twitterId,
-      },
-    });
   }
 }

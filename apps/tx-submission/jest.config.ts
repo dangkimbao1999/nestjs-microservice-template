@@ -1,11 +1,11 @@
 /* eslint-disable */
 export default {
-  displayName: 'social-fi-workspace',
+  displayName: 'tx-submission',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/apps/social-fi-workspace',
+  coverageDirectory: '../../coverage/apps/tx-submission',
 };
