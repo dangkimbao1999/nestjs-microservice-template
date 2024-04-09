@@ -14,6 +14,7 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
+    "resolveJsonModule": true,
     "paths": {
       "@social-fi-workspace/shared": ["shared/src/index.ts"],
       "@social-fi-workspace/shared/dto": ["shared/src/lib/dto/index.ts"],

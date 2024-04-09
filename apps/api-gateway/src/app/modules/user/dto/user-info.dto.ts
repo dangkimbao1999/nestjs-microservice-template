@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 
 export class UserInfo implements User {
   id: string;
@@ -15,7 +16,7 @@ export class UserInfo implements User {
   shortLink: string;
   coverImage: string;
   accountStatus: boolean;
-  point: number;
+  point: Decimal;
   twitterId: string;
   teleId: string;
   referrerId: string;

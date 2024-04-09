@@ -1,21 +1,21 @@
 {
-  "name": "social-fi-workspace",
+  "name": "tx-submission",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/social-fi-workspace/src",
+  "sourceRoot": "apps/tx-submission/src",
   "projectType": "application",
   "targets": {
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "social-fi-workspace:build"
+        "buildTarget": "tx-submission:build"
       },
       "configurations": {
         "development": {
-          "buildTarget": "social-fi-workspace:build:development"
+          "buildTarget": "tx-submission:build:development"
         },
         "production": {
-          "buildTarget": "social-fi-workspace:build:production"
+          "buildTarget": "tx-submission:build:production"
         }
       }
     }
