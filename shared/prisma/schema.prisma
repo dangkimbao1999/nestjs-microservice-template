@@ -8,27 +8,29 @@ datasource db {
 }
 
 model User {
-  id            String             @db.VarChar(255)
-  avatar        String?
-  username      String?            @unique
-  signature     String?            @unique
-  signedMessage String?
-  publicKey     String?
-  signDate      DateTime?
-  acceptedTerms Boolean            @default(false)
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  shortLink     String?            @unique
-  coverImage    String?
-  accountStatus Boolean            @default(false)
-  point         Decimal              @default(0)
-  twitterId     String?             @unique
-  teleId        String?
-  referrer      User?              @relation("UserReferral", fields: [referrerId], references: [id])
-  referrerId    String?
-  referees      User[]             @relation("UserReferral")
-  logs          UserActivityLogs[]
-  loginHistory  CheckinHistory[]
+  id                 String             @db.VarChar(255)
+  avatar             String?
+  username           String?            @unique
+  signature          String?            @unique
+  signedMessage      String?
+  publicKey          String?
+  signDate           DateTime?
+  acceptedTerms      Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  shortLink          String?            @unique
+  coverImage         String?
+  accountStatus      Boolean            @default(false)
+  point              Decimal            @default(0)
+  twitterId          String?            @unique
+  teleId             String?
+  referrer           User?              @relation("UserReferral", fields: [referrerId], references: [id])
+  referrerId         String?
+  referees           User[]             @relation("UserReferral")
+  isNewMemberClaimed Boolean            @default(false)
+  claimStreak        Int                @default(0)
+  logs               UserActivityLogs[]
+  loginHistory       CheckinHistory[]
 
   @@id([id])
   @@map("users")
@@ -43,7 +45,7 @@ model Platform {
 model Criteria {
   id          Int                @id @default(autoincrement())
   description String?
-  rate       Float                @default(0)
+  rate        Float              @default(0)
   platform    PlatformCriteria[]
 }
 
@@ -54,20 +56,21 @@ model PlatformCriteria {
   platformId   String
   logs         UserActivityLogs[]
   lastIdSynced String?
-  query       Json?
-  isDaily     Boolean             @default(false)
-  id          String              @default(uuid()) @id
+  query        Json?
+  isDaily      Boolean            @default(false)
+  id           String             @id @default(uuid())
 }
 
 model UserActivityLogs {
-  user       User             @relation(fields: [userId], references: [id])
-  userId     String
-  task       PlatformCriteria @relation(fields: [taskId], references: [id])
-  taskId      String
-  time       DateTime         @default(now())
-  pointClaimed  Decimal           
+  user         User             @relation(fields: [userId], references: [id])
+  userId       String
+  task         PlatformCriteria @relation(fields: [taskId], references: [id])
+  taskId       String
+  time         DateTime         @default(now())
+  id           String           @id @default(uuid())
+  pointClaimed Decimal
 
-  @@id([userId,taskId])
+  @@index([userId, taskId])
   @@index([time(sort: Desc)])
 }
 
@@ -77,6 +80,18 @@ model CheckinHistory {
   loginAt DateTime @default(now())
   user    User     @relation(fields: [userId], references: [id])
 
-  @@map("login_histories")
   @@index([userId, loginAt(sort: Desc)])
+  @@map("login_histories")
+}
+
+model TransactionLog {
+  txHash    String      @id
+  userId    String
+  status    TX_STATUS
+  description String
+}
+
+enum TX_STATUS {
+  FAILED
+  SUCCESS
 }

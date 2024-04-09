@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { TransactionEventDto } from '@social-fi-workspace/shared/dto';
+import {
+  TransactionEventDto,
+  TransactionResponseDto,
+} from '@social-fi-workspace/shared/dto';
 import * as ethers from 'ethers';
 
 @Injectable()
@@ -58,6 +61,34 @@ export class AppService {
     } catch (err) {
       console.error(err);
       return false;
+    }
+  }
+
+  async transferEth(
+    to: string,
+    amount: string,
+  ): Promise<TransactionResponseDto> {
+    try {
+      // Convert amount to wei, as transactions are dealt with in wei
+      const value = ethers.parseEther(amount);
+
+      // Prepare and send the transaction
+      const txResponse = await this.rotateWallet().sendTransaction({
+        to: to,
+        value: value,
+      });
+
+      // Wait for the transaction to be mined
+      await txResponse.wait();
+
+      console.log(`ETH Transfer ${txResponse.hash} executed successfully.`);
+      const status = await txResponse.wait()
+      return {
+        status: Boolean(Number(!!status)),
+        txHash: txResponse.hash,
+      }; // Transfer was successful
+    } catch (error) {
+      console.error(`ETH Transfer failed: ${error}`);
     }
   }
 }

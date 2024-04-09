@@ -1,8 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
 export class UserInfo implements User {
+  claimStreak: number;
+  isNewMemberClaimed: boolean;
   id: string;
   avatar: string;
   username: string;

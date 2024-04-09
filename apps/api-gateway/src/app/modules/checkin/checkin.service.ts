@@ -1,24 +1,180 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { PrismaService } from '@social-fi-workspace/shared/services';
 import {
-  addDays,
+  PrismaService,
+  ReferralService,
+} from '@social-fi-workspace/shared/services';
+import {
   differenceInCalendarDays,
   endOfWeek,
   isSameDay,
   parseISO,
   startOfWeek,
+  startOfDay,
+  endOfDay,
 } from 'date-fns';
+import { TransacionSubmitService } from '../transacion-submit/transacion-submit.service';
+import { abi as FoodMinter } from '../../commons/abis/FoodMinter.json';
 
 @Injectable()
 export class CheckinService {
-  constructor(private readonly prisma: PrismaService) {}
-  async checkin(user: User) {
-    await this.prisma.checkinHistory.create({
-      data: {
-        userId: user.id,
+  constructor(
+    private readonly prisma: PrismaService,
+    readonly txSubmit: TransacionSubmitService,
+    readonly referrerService: ReferralService,
+  ) {}
+
+  async markCompleted(userId: string, taskId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
       },
     });
+    if (!user) return;
+    const task = await this.prisma.platformCriteria.findUnique({
+      where: { id: taskId },
+      include: {
+        criteria: true,
+      },
+    });
+    if (user) {
+      const calculatedPoint =
+        (process.env.BASE_POINT as unknown as number) * task.criteria.rate;
+      await this.prisma.userActivityLogs.create({
+        data: {
+          userId: user.id,
+          taskId,
+          pointClaimed: calculatedPoint,
+        },
+      });
+      await this.prisma.user.update({
+        where: {
+          twitterId: user.twitterId,
+        },
+        data: {
+          point: {
+            increment: calculatedPoint,
+          },
+        },
+      });
+      console.log(user, calculatedPoint);
+      await this.referrerService.create(user.id, calculatedPoint);
+    }
+  }
+
+  async checkin(user: User) {
+    try {
+      const isCheckinToday = await this.prisma.checkinHistory.findFirst({
+        where: {
+          userId: user.id,
+          loginAt: {
+            gte: startOfDay(new Date()),
+            lte: endOfDay(new Date()),
+          },
+        },
+      });
+      if (!isCheckinToday) {
+        await this.prisma.checkinHistory.create({
+          data: {
+            userId: user.id,
+          },
+        });
+      } else {
+        return;
+      }
+      const dailyStreak = await this.checkForRewards(user.id, 'continuous');
+      if (!user.isNewMemberClaimed && dailyStreak.streak > user.claimStreak) {
+        if (dailyStreak.streak === 3) {
+          await this.txSubmit.publishEthTransferEvent({
+            value: '0.1',
+            to: user.id,
+          });
+        } else if (dailyStreak.streak === 5) {
+          await this.txSubmit.publishEthTransferEvent({
+            value: '0.15',
+            to: user.id,
+          });
+        } else if (dailyStreak.streak === 7) {
+          await this.txSubmit.publishEthTransferEvent({
+            value: '0.25',
+            to: user.id,
+          });
+          // MARK CLAIMED ONETIME
+          await this.prisma.user.update({
+            where: {
+              id: user.id,
+            },
+            data: {
+              isNewMemberClaimed: true,
+            },
+          });
+        }
+      } else {
+        await this.prisma.user.update({
+          where: { id: user.id },
+          data: { claimStreak: { increment: 1 } },
+        });
+      }
+    } catch (err) {
+      console.error('err1: ', err);
+    }
+
+    try {
+      const weeklyStreak = await this.checkForRewards(user.id, 'weekly');
+      console.log(weeklyStreak);
+      if (weeklyStreak.streak === 3) {
+        await this.txSubmit.publishMintNftEvent({
+          contractAddress: '0xAFF6FF8b55a6EE368acc4d80A70feB31c517609b',
+          abi: FoodMinter,
+          methodName: 'mint',
+          methodParams: [user.id],
+          transactionOptions: { gasLimit: 100000 },
+        });
+      } else if (weeklyStreak.streak === 5) {
+        await this.txSubmit.publishMintNftEvent({
+          contractAddress: '0xAFF6FF8b55a6EE368acc4d80A70feB31c517609b',
+          abi: FoodMinter,
+          methodName: 'mint',
+          methodParams: [user.id],
+          transactionOptions: { gasLimit: 100000 },
+        });
+      } else if (weeklyStreak.streak === 7) {
+        await this.txSubmit.publishMintNftEvent({
+          contractAddress: '0xAFF6FF8b55a6EE368acc4d80A70feB31c517609b',
+          abi: FoodMinter,
+          methodName: 'mint',
+          methodParams: [user.id],
+          transactionOptions: { gasLimit: 100000 },
+        });
+      } else {
+        const checkpointStreak = this.findClosest(
+          [1, 3, 5, 7],
+          weeklyStreak.streak,
+        );
+        const task = await this.prisma.platformCriteria.findFirst({
+          where: {
+            platformId: 'base',
+            criteria: {
+              description: `Checkin-${checkpointStreak}`,
+            },
+          },
+        });
+        console.log(task);
+        //BOOST BASE POINT
+        await this.markCompleted(user.id, task.id);
+      }
+    } catch (err) {
+      console.error('err2: ', err);
+    }
+  }
+
+  private findClosest(arr, num) {
+    let closest = null;
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] > num) break;
+      closest = arr[i];
+    }
+    return closest;
   }
 
   // Calculate the continuous streak
@@ -26,6 +182,7 @@ export class CheckinService {
     const checkIns = await this.prisma.checkinHistory.findMany({
       where: { userId },
       orderBy: { loginAt: 'desc' },
+      take: 7,
     });
     if (checkIns.length === 0) return 0;
 
@@ -65,6 +222,7 @@ export class CheckinService {
       orderBy: {
         loginAt: 'asc',
       },
+      take: 7,
     });
 
     if (checkInsThisWeek.length === 0) return 0;

@@ -32,45 +32,78 @@ export class TwitterAPIService {
         criteria: true,
       },
     });
-    const activityLog = await this.prisma.userActivityLogs.findUnique({
+    const activityLog = await this.prisma.userActivityLogs.findFirst({
       where: {
-        userId_taskId: {
-          userId: user.id,
-          taskId,
-        },
+        userId: user.id,
+        taskId,
       },
     });
-    if (!activityLog && user) {
-      const calculatedPoint =
-        (process.env.BASE_POINT as unknown as number) * task.criteria.rate;
-      await this.prisma.userActivityLogs.create({
-        data: {
-          userId: user.id,
-          taskId,
-          pointClaimed: calculatedPoint,
-        },
-      });
-      await this.prisma.user.update({
-        where: {
-          twitterId: user.twitterId,
-        },
-        data: {
-          point: {
-            increment: calculatedPoint,
+    if (!task.isDaily) {
+      if (!activityLog && user) {
+        const calculatedPoint =
+          (process.env.BASE_POINT as unknown as number) * task.criteria.rate;
+        await this.prisma.userActivityLogs.create({
+          data: {
+            userId: user.id,
+            taskId,
+            pointClaimed: calculatedPoint,
           },
+        });
+        await this.prisma.user.update({
+          where: {
+            twitterId: user.twitterId,
+          },
+          data: {
+            point: {
+              increment: calculatedPoint,
+            },
+          },
+        });
+        console.log(user, calculatedPoint);
+        await this.referrerService.create(user.id, calculatedPoint);
+      }
+      await this.prisma.platformCriteria.update({
+        where: {
+          id: taskId,
+        },
+        data: {
+          lastIdSynced: tweetId ? tweetId : twitterId,
         },
       });
-      console.log(user, calculatedPoint)
-      await this.referrerService.create(user.id, calculatedPoint);
+    } else {
+      // todo: to be defined later
+      if (!activityLog && user) {
+        const calculatedPoint =
+          (process.env.BASE_POINT as unknown as number) * task.criteria.rate;
+        await this.prisma.userActivityLogs.create({
+          data: {
+            userId: user.id,
+            taskId,
+            pointClaimed: calculatedPoint,
+          },
+        });
+        await this.prisma.user.update({
+          where: {
+            twitterId: user.twitterId,
+          },
+          data: {
+            point: {
+              increment: calculatedPoint,
+            },
+          },
+        });
+        console.log(user, calculatedPoint);
+        await this.referrerService.create(user.id, calculatedPoint);
+      }
+      await this.prisma.platformCriteria.update({
+        where: {
+          id: taskId,
+        },
+        data: {
+          lastIdSynced: tweetId ? tweetId : twitterId,
+        },
+      });
     }
-    await this.prisma.platformCriteria.update({
-      where: {
-        id: taskId,
-      },
-      data: {
-        lastIdSynced: tweetId ? tweetId : twitterId,
-      },
-    });
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
